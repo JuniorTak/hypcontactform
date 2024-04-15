@@ -1,37 +1,44 @@
 <?php
 /**
- * @package Hyp_Contact_Form
+ * @package HypContactForm
  * @version 1.0
+ *
+ * Plugin Name: Hyp Contact Form
+ * Plugin URI: https://github.com/JuniorTak
+ * Description: This is a simple plugin to generate a contact form for users to add into their website
+ * Version: 1.0
+ * Author: Hyppolite Takoua Foduop
+ * Author URI: https://www.hyppolitetakouafoduop.online
+ * License: GPLv2 or later
+ * Text Domain: hypcontactform
  */
-/*
-Plugin Name: Hyp Contact Form
-Plugin URI: https://github.com/JuniorTak
-Description: This is a simple plugin to generate a contact form for users to add into their website
-Version: 1.0
-Author: Hyppolite Takoua Foduop
-Author URI: https://www.hyppolitetakouafoduop.online
-License: GPLv2 or later
-Text Domain: hypcontactform
-*/
 
-define('HCF_PATH', WP_PLUGIN_URL . '/' . plugin_basename( dirname(__FILE__) ) . '/' );
-define('HCF_NAME', "Hyp Contact Form");
-define ("HCF_VERSION", "1.0");
-define ("HCF_SLUG", 'hyp-contact-form');
+define( 'HCF_PATH', WP_PLUGIN_URL . '/' . plugin_basename( __DIR__ ) . '/' );
+define( 'HCF_NAME', 'Hyp Contact Form' );
+define( 'HCF_VERSION', '1.0' );
+define( 'HCF_SLUG', 'hyp-contact-form' );
 
-/* Building the form */
-function hcf_build_form($sendTo, $subject){
+/**
+ * Building the form
+ *
+ * @param string $send_to The recepient email address.
+ * @param string $subject The email subject.
+ * @return string
+ */
+function hcf_build_form( $send_to, $subject ) {
 
-    /* Processing the form */
-    if(isset($_POST['hcf-submit'])){
-        include('hypprocessform.php');
-        $hcfProcessor= new HypProcessForm($sendTo);
-        $message= $hcfProcessor->email($subject, $hcfProcessor->buildMsg($_POST), $_POST['hcf-email']);
-        print "<h3>$message</h3>";
-    }
-    
-    $form= '<div class="'. HCF_SLUG . '">
-                <form name="'. HCF_SLUG . '" method="POST">
+	// Processing the form.
+	if ( isset( $_POST['hcf-submit'] ) ) {
+		include 'class-hypprocessform.php';
+		$hcf_processor = new HypProcessForm( $send_to );
+		if ( isset( $_POST['hcf-email'] ) ) {
+			$message = $hcf_processor->email( $subject, $hcf_processor->build_msg( $_POST ), sanitize_text_field( wp_unslash( $_POST['hcf-email'] ) ) );
+			print '<h3>' . esc_html( $message ) . '</h3>';
+		}
+	}
+
+	$form = '<div class="' . HCF_SLUG . '">
+                <form name="' . HCF_SLUG . '" method="POST">
                     <div>
                         <label for="hcf-name">Name:</label><br/>
                         <input type="text" name="hcf-name" required="required" placeholder="ex David Colman" />
@@ -49,33 +56,44 @@ function hcf_build_form($sendTo, $subject){
                     </div>
                 </form>
             </div>';
-    
-    return $form;
 
+	return $form;
 }
 
-/* For shortcode */
-function hcf_insert_form($atts, $content=null){
+/**
+ * For shortcode usage
+ *
+ * @param array $atts The shortcode attribut.
+ * @return string
+ */
+function hcf_insert_form( $atts ) {
 
-    extract(shortcode_atts( array(
-        'sendto' => get_bloginfo('admin_email'),
-        'subject' => 'Contact Form from '. get_bloginfo('name')
-    ), $atts));
+	extract(
+		shortcode_atts(
+			array(
+				'send_to' => get_bloginfo( 'admin_email' ),
+				'subject' => 'Contact Form from ' . get_bloginfo( 'name' ),
+			),
+			$atts
+		)
+	);
 
-    $form = hcf_build_form($sendto, $subject);
-    
-    return $form;
+	$form = hcf_build_form( $send_to, $subject );
 
+	return $form;
 }
-add_shortcode('hcf_form', 'hcf_insert_form');
+add_shortcode( 'hcf_form', 'hcf_insert_form' );
 
-/* For template tag */
-function hcf_get_form($sendto="", $subject=""){
-    
-    $sendto= ($sendto == "") ? get_bloginfo('admin_email') : $sendto;
-    $subject= ($subject == "") ? 'Contact Form from '. get_bloginfo('name') : $subject;
-    print hcf_build_form($sendto, $subject);
+/**
+ * For template tag usage
+ *
+ * @param string $send_to The recepient email address.
+ * @param string $subject The email subject.
+ * @return void
+ */
+function hcf_get_form( $send_to = '', $subject = '' ) {
 
+	$send_to = ( $send_to === '' ) ? get_bloginfo( 'admin_email' ) : $send_to;
+	$subject = ( $subject === '' ) ? 'Contact Form from ' . get_bloginfo( 'name' ) : $subject;
+	print esc_html( hcf_build_form( $send_to, $subject ) );
 }
-
-?>
