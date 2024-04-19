@@ -93,7 +93,7 @@ add_shortcode( 'hcf_form', 'hcf_insert_form' );
  */
 function hcf_get_form( $send_to = '', $subject = '' ) {
 
-	$send_to = ( $send_to === '' ) ? get_bloginfo( 'admin_email' ) : $send_to;
-	$subject = ( $subject === '' ) ? 'Contact Form from ' . get_bloginfo( 'name' ) : $subject;
+	$send_to = ( ! $send_to ) ? get_bloginfo( 'admin_email' ) : $send_to;
+	$subject = ( ! $subject ) ? 'Contact Form from ' . get_bloginfo( 'name' ) : $subject;
 	print esc_html( hcf_build_form( $send_to, $subject ) );
 }
