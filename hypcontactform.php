@@ -29,16 +29,23 @@ function hcf_build_form( $send_to, $subject ) {
 
 	// Processing the form.
 	if ( isset( $_POST['hcf-submit'] ) ) {
-		include 'class-hypprocessform.php';
-		$hcf_processor = new HypProcessForm( $send_to );
-		if ( isset( $_POST['hcf-email'] ) ) {
-			$message = $hcf_processor->email( $subject, $hcf_processor->build_msg( $_POST ), sanitize_text_field( wp_unslash( $_POST['hcf-email'] ) ) );
-			print '<h3>' . esc_html( $message ) . '</h3>';
+		if ( isset( $_POST['hcf-nonce'] ) ) {
+			if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hcf-nonce'] ) ), 'hcf_nonce' ) ) {
+				include 'class-hypprocessform.php';
+				$hcf_processor = new HypProcessForm( $send_to );
+				if ( isset( $_POST['hcf-email'] ) ) {
+					$message = $hcf_processor->email( $subject, $hcf_processor->build_msg( $_POST ), sanitize_text_field( wp_unslash( $_POST['hcf-email'] ) ) );
+					print '<h3>' . esc_html( $message ) . '</h3>';
+				}
+			} else {
+				print '<h3>Unable to verify the form submission! Please try again.</h3>';
+			}
 		}
 	}
 
 	$form = '<div class="' . HCF_SLUG . '">
-                <form name="' . HCF_SLUG . '" method="POST">
+				<form name="' . HCF_SLUG . '" method="POST">
+					<input type="hidden" name="hcf-nonce" value="' . wp_create_nonce( 'hcf_nonce' ) . '"/>
                     <div>
                         <label for="hcf-name">Name:</label><br/>
                         <input type="text" name="hcf-name" required="required" placeholder="ex David Colman" />
@@ -68,17 +75,15 @@ function hcf_build_form( $send_to, $subject ) {
  */
 function hcf_insert_form( $atts ) {
 
-	extract(
-		shortcode_atts(
-			array(
-				'send_to' => get_bloginfo( 'admin_email' ),
-				'subject' => 'Contact Form from ' . get_bloginfo( 'name' ),
-			),
-			$atts
-		)
+	$arr = shortcode_atts(
+		array(
+			'send_to' => get_bloginfo( 'admin_email' ),
+			'subject' => 'Contact Form from ' . get_bloginfo( 'name' ),
+		),
+		$atts
 	);
 
-	$form = hcf_build_form( $send_to, $subject );
+	$form = hcf_build_form( $arr['send_to'], $arr['subject'] );
 
 	return $form;
 }
