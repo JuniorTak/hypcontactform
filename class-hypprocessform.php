@@ -1,6 +1,6 @@
 <?php
 /**
- * @package HypProcessForm
+ * @package HypContactForm
  */
 
 /**
