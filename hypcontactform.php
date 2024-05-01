@@ -4,7 +4,7 @@
  * @version 1.0
  *
  * Plugin Name: Hyp Contact Form
- * Plugin URI: https://github.com/JuniorTak
+ * Plugin URI: https://github.com/JuniorTak/hypcontactform/
  * Description: This is a simple plugin to generate a contact form for users to add into their website
  * Version: 1.0
  * Author: Hyppolite Takoua Foduop
